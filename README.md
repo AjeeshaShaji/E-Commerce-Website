@@ -18,10 +18,12 @@ This project includes user authentication, product management, cart, wishlist, o
 * Cancel pending orders.
 * Manage user **Profile** (view and edit details).
 
-### Admin Features (Optional)
+### Admin Features
 
 * Add, update, or delete products.
-* View all orders and their statuses.
+* View and manage all orders and their statuses.
+* View all users and their details.
+
 
 ### Technical Features
 
