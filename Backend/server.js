@@ -2,27 +2,29 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./connection.js";
-import authRoutes from "./routes/authRoutes.js";
-
+import router from "./routes/authRoutes.js";
 
 dotenv.config();
 connectDB();
 
 const app = express();
 
-/* ✅ FIXED CORS */
-app.use(
-  cors({
-    origin: "http://localhost:5173", // frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
-  })
-);
+/* CORS — MUST BE FIRST */
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
+
+/* Body parser */
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
+/* Routes */
+app.use("/api/auth", router);
+
+
 
 app.listen(3000, () => {
-  console.log("🚀 Server running on http://localhost:3000");
+  console.log(" Server running on http://localhost:3000");
 });

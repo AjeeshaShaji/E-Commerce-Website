@@ -1,69 +1,100 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const login = async () => {   
+  //  Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token && role === "admin") navigate("/admin/dashboard");
+    if (token && role === "user") navigate("/user");
+  }, []);
+
+  const login = async () => {
     if (!email || !password) {
-      alert("Email and password required");
+      alert("Please enter email and password");
       return;
     }
+
     try {
       setLoading(true);
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email, password }
-      );
 
-      // ✅ SAVE BOTH
+      const res = await API.post("/login", { email, password });
+
+      // Save token
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.user.id);
+      localStorage.setItem("role", res.data.role);
 
-      navigate("/dashboard");
+      alert("Login successful");
 
-    } catch (error) {
-      alert(
-        error.response?.data?.message || "Login failed"
-      );
+      // Redirect based on role
+      if (res.data.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "80px auto" }}>
-      <h2>Login</h2>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        style={{ width: "100%", marginBottom: "10px" }}
-      />
+      <div className="bg-white p-8 rounded-xl shadow-lg w-96">
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        style={{ width: "100%", marginBottom: "10px" }}
-      />
+        <h2 className="text-2xl font-bold mb-6 text-center text-indigo-600">
+          Login
+        </h2>
 
-      <button
-        onClick={login}
-        disabled={loading}
-        style={{ width: "100%" }}
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-2 border rounded-lg mb-4"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-2 border rounded-lg mb-4"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={login}
+          disabled={loading}
+          className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        <p className="text-center mt-4 text-sm">
+          Don't have an account?{" "}
+          <span
+            className="text-indigo-600 cursor-pointer"
+            onClick={() => navigate("/email")}
+          >
+            Signup
+          </span>
+        </p>
+
+      </div>
+
     </div>
   );
 }
-
-export default Login;

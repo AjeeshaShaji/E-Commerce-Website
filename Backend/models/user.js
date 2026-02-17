@@ -13,7 +13,23 @@ const userSchema = new mongoose.Schema({
   otpExpires: Date,
   isVerified: { type: Boolean, default: false },
 
-  role: { type: String, default: "user" }
-});
+role: { type: String, default: "user" },
+
+  cart: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+      quantity: { type: Number, default: 1 }
+    }
+  ],
+
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product"
+    }
+  ]
+}, { timestamps: true });
 
 export default mongoose.model("User", userSchema);
+
+
