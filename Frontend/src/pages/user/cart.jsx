@@ -6,6 +6,7 @@ export default function Cart() {
   const [showForm, setShowForm] = useState(false);
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const loadCart = () => {
     API.get("/user/cart")
@@ -23,8 +24,17 @@ export default function Cart() {
 
   const handlePlaceOrderClick = () => setShowForm(true);
 
+  // Validate phone number: exactly 10 digits
+  const validatePhone = (number) => /^[0-9]{10}$/.test(number);
+
+  const handlePhoneChange = (value) => {
+    setPhone(value.replace(/\D/, "")); // remove non-numeric input
+    setPhoneError(validatePhone(value) ? "" : "Phone must be 10 digits");
+  };
+
   const confirmOrder = () => {
     if (!address || !phone) return alert("Please fill all details");
+    if (!validatePhone(phone)) return alert("Please enter a valid 10-digit phone number");
 
     API.post("/user/order", { address, phone })
       .then(() => {
@@ -32,16 +42,14 @@ export default function Cart() {
         setShowForm(false);
         setAddress("");
         setPhone("");
+        setPhoneError("");
         loadCart();
       })
       .catch((err) => console.log(err));
   };
 
   const calculateTotal = () =>
-    cart.reduce(
-      (acc, item) => acc + (item.productId?.price || 0),
-      0
-    );
+    cart.reduce((acc, item) => acc + (item.productId?.price || 0), 0);
 
   return (
     <div className="bg-gray-50 min-h-screen p-6">
@@ -79,12 +87,8 @@ export default function Cart() {
 
           {/* TOTAL AMOUNT */}
           <div className="flex justify-between items-center bg-white rounded-2xl shadow-lg p-4 mt-4">
-            <span className="text-lg font-semibold text-gray-800">
-              Total:
-            </span>
-            <span className="text-xl font-bold text-green-600">
-              ₹{calculateTotal()}
-            </span>
+            <span className="text-lg font-semibold text-gray-800">Total:</span>
+            <span className="text-xl font-bold text-green-600">₹{calculateTotal()}</span>
           </div>
 
           {/* PLACE ORDER BUTTON */}
@@ -105,6 +109,7 @@ export default function Cart() {
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">
                 Delivery Details
               </h2>
+
               <input
                 type="text"
                 placeholder="Enter Address"
@@ -112,16 +117,23 @@ export default function Cart() {
                 onChange={(e) => setAddress(e.target.value)}
                 className="border p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
+
               <input
                 type="text"
                 placeholder="Phone Number"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="border p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                maxLength={10}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                className="border p-3 w-full mb-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
+              {phoneError && <p className="text-red-500 text-sm mb-3">{phoneError}</p>}
+
               <button
                 onClick={confirmOrder}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 w-full"
+                disabled={!!phoneError || !address || !phone}
+                className={`bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 w-full ${
+                  !!phoneError || !address || !phone ? "cursor-not-allowed bg-gray-400 hover:bg-gray-400" : ""
+                }`}
               >
                 Confirm Order
               </button>

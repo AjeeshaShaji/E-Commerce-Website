@@ -33,7 +33,7 @@ export default function Profile() {
           <div className="space-y-3">
             <p>
               <span className="font-semibold text-gray-700">Name:</span>{" "}
-              {user.fullname}
+              {user.fullName}
             </p>
             <p>
               <span className="font-semibold text-gray-700">Email:</span>{" "}
@@ -67,9 +67,9 @@ export default function Profile() {
             <input
               type="text"
               placeholder="Full Name"
-              value={user.fullname || ""}
+              value={user.fullName || ""}
               onChange={(e) =>
-                setUser({ ...user, fullname: e.target.value })
+                setUser({ ...user, fullName: e.target.value })
               }
               className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
